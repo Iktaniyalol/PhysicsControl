@@ -120,7 +120,7 @@ public final class PControlDataBukkit implements PControlData {
     private void validateServerVersions() {
         try {
             if (!this.serverVersion.hasVersion(1, 0, 0)
-                || this.serverVersion.hasVersion(2, 0, 0)
+                || (this.serverVersion.hasVersion(2, 0, 0) && !this.serverVersion.hasVersion(26, 0, 0))
             ) {
                 throw new IllegalArgumentException("Wrong major version");
             }
