@@ -52,6 +52,24 @@ public class TypesSetsParser {
         return this.createSetConsumer(elements, "tree_types", TreeType.class, parseVersion);
     }
 
+    private <E extends Enum<E>, T extends CustomEnumSet<E, ?>> void addPrimitiveOrAliased(
+        @Nonnull T set,
+        @Nonnull Class<E> typeClass,
+        @Nonnull String enumName
+    ) {
+        try {
+            set.add(enumName);
+        } catch (IllegalArgumentException ex) {
+            if (typeClass == EntityType.class && enumName.equals("BOAT")) {
+                // Since 1.21.2 BOAT is split into per-wood-type entities
+                set.add(type -> type.name().endsWith("_BOAT") || type.name().equals("BAMBOO_RAFT"));
+                return;
+            }
+            this.data.log().warning("Skipping unknown " + typeClass.getSimpleName()
+                + " element \"" + enumName + "\": " + ex.getMessage());
+        }
+    }
+
     private final Map<String, Boolean> supportedVersionsCache = new HashMap<>();
 
     @Nonnull
@@ -74,7 +92,7 @@ public class TypesSetsParser {
                     String elementOrTagName = args[args.length - 1];
 
                     if (!elementOrTagName.startsWith("#")) {
-                        set.add(elementOrTagName.toUpperCase());
+                        this.addPrimitiveOrAliased(set, typeClass, elementOrTagName.toUpperCase());
                         continue;
                     }
 
